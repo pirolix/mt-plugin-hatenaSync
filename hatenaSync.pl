@@ -32,21 +32,15 @@ MT->add_plugin ($plugin);
 
 sub instance { $plugin; }
 
-### Registry callbacks and tasks
-sub init_registry {
-    my $plugin = shift;
-    $plugin->registry({
-        callbacks => {
-           'MT::Entry::post_save' => \&_entry_post_save,
-        },
-    });
-}
 
 
-
-### Make a mark when entry posts.
+MT->add_callback ('BuildFile', 5, $plugin, \&_entry_post_save);
 sub _entry_post_save {
-    my ($eh, $entry) = @_;
+    my ($eh, %opt) = @_;
+
+    my $ctx = $opt{Context};
+    my $entry = $ctx->stash ('entry')
+        or return 1;
 
     my $blog_id = $entry->blog_id;
     my $scope = "blog:$blog_id";
